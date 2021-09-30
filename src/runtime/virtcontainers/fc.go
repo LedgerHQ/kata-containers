@@ -82,7 +82,7 @@ const (
 )
 
 // Specify the minimum version of firecracker supported
-var fcMinSupportedVersion = semver.MustParse("0.21.1")
+var fcMinSupportedVersion = semver.MustParse("0.24.0")
 
 var fcKernelParams = append(commonVirtioblkKernelRootParams, []Param{
 	// The boot source is the first partition of the first block device added
@@ -273,20 +273,24 @@ func (fc *firecracker) vmRunning() bool {
 		fc.Logger().WithError(err).Error("getting vm status failed")
 		return false
 	}
+/* 	// InstanceInfoStateNotStarted captures enum value "Not started"
+	InstanceInfoStateNotStarted string = "Not started"
 
+	// InstanceInfoStateRunning captures enum value "Running"
+	InstanceInfoStateRunning string = "Running"
+
+	// InstanceInfoStatePaused captures enum value "Paused"
+	InstanceInfoStatePaused string = "Paused"
+	*/
 	// Be explicit
 	switch *resp.Payload.State {
-	case models.InstanceInfoStateStarting:
-		// Unsure what we should do here
-		fc.Logger().WithField("unexpected-state", models.InstanceInfoStateStarting).Debug("vmRunning")
-		return false
 	case models.InstanceInfoStateRunning:
 		return true
-	case models.InstanceInfoStateUninitialized:
-		return false
-	default:
-		return false
+	case models.InstanceInfoStatePaused, models.InstanceInfoStateNotStarted:
+		// Unsure what we should do here
+		fc.Logger().WithField("unexpected-state", *resp.Payload.State).Debug("vmRunning")
 	}
+	return false
 }
 
 func (fc *firecracker) getVersionNumber() (string, error) {
@@ -623,8 +627,11 @@ func (fc *firecracker) fcSetLogger() error {
 
 	fc.fcConfig.Logger = &models.Logger{
 		Level:       &fcLogLevel,
-		LogFifo:     &jailedLogFifo,
-		MetricsFifo: &jailedMetricsFifo,
+		LogPath:     &jailedLogFifo,
+	}
+
+	fc.fcConfig.Metrics = &models.Metrics{
+		MetricsPath: &jailedMetricsFifo,
 	}
 
 	return err
@@ -1009,7 +1016,7 @@ func (fc *firecracker) fcUpdateBlockDrive(path, id string) error {
 
 	driveFc := &models.PartialDrive{
 		DriveID:    &id,
-		PathOnHost: &path, //This is the only property that can be modified
+		PathOnHost: path, //This is the only property that can be modified
 	}
 
 	driveParams.SetBody(driveFc)
