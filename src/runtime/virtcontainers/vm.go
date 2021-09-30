@@ -131,8 +131,10 @@ func NewVM(ctx context.Context, config VMConfig) (*VM, error) {
 
 	// 3. boot up guest vm
 	if err = hypervisor.startSandbox(vmStartTimeout); err != nil {
+		virtLog.WithError(err).Errorf("Failed to startSandbox")
 		return nil, err
 	}
+	virtLog.WithField("vm", id).Info("startSandbox OK")
 
 	defer func() {
 		if err != nil {

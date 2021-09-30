@@ -541,15 +541,20 @@ func (fc *firecracker) fcJailResource(src, dst string) (string, error) {
 }
 
 func (fc *firecracker) fcSetBootSource(path, params string) error {
-	span, _ := fc.trace("fcSetBootSource")
+	span, _ := fc.trace("fcSetBootSource0")
 	defer span.End()
 	fc.Logger().WithFields(logrus.Fields{"kernel-path": path,
-		"kernel-params": params}).Debug("fcSetBootSource")
+		"kernel-params": params}).Debug("fcSetBootSource1")
 
 	kernelPath, err := fc.fcJailResource(path, fcKernel)
 	if err != nil {
+		fc.Logger().WithError(err).WithFields(logrus.Fields{"kernel-path": path,
+		"kernel-params": params, "fc-kernel": fcKernel}).Error("fcSetBootSource fcJailResource failed")
 		return err
 	}
+
+	fc.Logger().WithFields(logrus.Fields{"kernel-path": path,
+	"kernel-params": params, "fc-kernel": fcKernel}).Debug("fcSetBootSource.fcJailResource OK")
 
 	src := &models.BootSource{
 		KernelImagePath: &kernelPath,
@@ -728,42 +733,51 @@ func (fc *firecracker) fcInitConfiguration() error {
 	strParams := SerializeParams(kernelParams, "=")
 	formattedParams := strings.Join(strParams, " ")
 	if err := fc.fcSetBootSource(kernelPath, formattedParams); err != nil {
+		fc.Logger().WithError(err).Error("Fail to fcSetBootSource")
 		return err
 	}
 
 	image, err := fc.config.InitrdAssetPath()
 	if err != nil {
+		fc.Logger().WithError(err).Error("Fail to read InitrdAssetPath")
 		return err
 	}
 
 	if image == "" {
 		image, err = fc.config.ImageAssetPath()
 		if err != nil {
+			fc.Logger().WithError(err).Error("Fail to read ImageAssetPath")
 			return err
 		}
 	}
 
 	if err := fc.fcSetVMRootfs(image); err != nil {
+		fc.Logger().WithError(err).Error("Fail to fcSetVMRootfs")
 		return err
 	}
 
 	if err := fc.createDiskPool(); err != nil {
+		fc.Logger().WithError(err).Error("Fail to createDiskPool")
 		return err
 	}
 
 	if err := fc.fcSetLogger(); err != nil {
+		fc.Logger().WithError(err).Error("Fail to fcSetLogger")
 		return err
 	}
 
 	fc.state.set(cfReady)
 	for _, d := range fc.pendingDevices {
 		if err := fc.addDevice(d.dev, d.devType); err != nil {
+			fc.Logger().WithError(err).Error("Failed to add device")
 			return err
 		}
 	}
 
 	// register firecracker specificed metrics
 	registerFirecrackerMetrics()
+
+	fc.Logger().Info("fcInitConfiguration OK")
 
 	return nil
 }
@@ -776,6 +790,7 @@ func (fc *firecracker) startSandbox(timeout int) error {
 	defer span.End()
 
 	if err := fc.fcInitConfiguration(); err != nil {
+		fc.Logger().WithError(err).Errorf("Failed to fcInitConfiguration")
 		return err
 	}
 
@@ -785,37 +800,45 @@ func (fc *firecracker) startSandbox(timeout int) error {
 	}
 
 	if err := ioutil.WriteFile(fc.fcConfigPath, data, 0640); err != nil {
+		fc.Logger().WithError(err).Errorf("Failed to write to fcConfigPath")
 		return err
 	}
 
 	var err error
 	defer func() {
 		if err != nil {
+			fc.Logger().WithError(err).Errorf("Failed to hmm not sure")
 			fc.fcEnd()
 		}
 	}()
+
+	fc.Logger().Info("Starting sandbox.. initConfiguration and reformat config file ok")
 
 	// This needs to be done as late as possible, since all processes that
 	// are executed by kata-runtime after this call, run with the SELinux
 	// label. If these processes require privileged, we do not want to run
 	// them under confinement.
 	if err := label.SetProcessLabel(fc.config.SELinuxProcessLabel); err != nil {
+		fc.Logger().WithError(err).Errorf("Failed to SetProcessLabel")
 		return err
 	}
 	defer label.SetProcessLabel("")
 
 	err = fc.fcInit(fcTimeout)
 	if err != nil {
+		fc.Logger().WithError(err).Errorf("Failed to fcInit")
 		return err
 	}
 
 	// make sure 'others' don't have access to this socket
 	err = os.Chmod(filepath.Join(fc.jailerRoot, defaultHybridVSocketName), 0640)
 	if err != nil {
+		fc.Logger().WithError(err).Errorf("Could not change socket permissions")
 		return fmt.Errorf("Could not change socket permissions: %v", err)
 	}
 
 	fc.state.set(vmReady)
+	fc.Logger().Info("VM READY")
 	return nil
 }
 
