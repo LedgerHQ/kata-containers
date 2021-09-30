@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -297,16 +298,19 @@ func (fc *firecracker) getVersionNumber() (string, error) {
 		return "", fmt.Errorf("Running checking FC version command failed: %v", err)
 	}
 
-	var version string
-	fields := strings.Split(string(data), " ")
-	if len(fields) > 1 {
-		// The output format of `Firecracker --verion` is as follows
-		// Firecracker v0.21.1
-		version = strings.TrimPrefix(strings.TrimSpace(fields[1]), "v")
-		return version, nil
+	// The output format of `Firecracker --version` is as follows
+	// Firecracker v0.24.3
+	// 
+	// Supported snapshot data format versions: v0.23.0, v0.24.0, v0.25.0
+	// 
+	//
+	r := regexp.MustCompile(`Firecracker v(\d+.\d+.\d+)`)
+	matches := r.FindStringSubmatch(string(data))
+	if(len(matches) >= 2) {
+		return matches[1], nil
 	}
 
-	return "", errors.New("getting FC version failed, the output is malformed")
+	return "", fmt.Errorf("getting FC version failed, the output is malformed '%s'", string(data))
 }
 
 func (fc *firecracker) checkVersion(version string) error {
