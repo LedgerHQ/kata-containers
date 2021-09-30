@@ -155,9 +155,9 @@ get_kernel() {
 		fi
 
 		sha256sum -c "${kernel_tarball}.sha256"
-
+		info "a"
 		tar xf "${kernel_tarball}"
-
+		info "b"
 		mv "linux-${version}" "${kernel_path}"
 	fi
 }
@@ -313,7 +313,7 @@ setup_kernel() {
 	[ -n "${kernel_path}" ] || die "kernel_path not provided"
 
 	if [ -d "$kernel_path" ]; then
-		info "${kernel_path} already exist"
+		info "${kernel_path} already exist..."
 		if [[ "${force_setup_generate_config}" != "true" ]];then
 			return
 		else
@@ -345,12 +345,13 @@ setup_kernel() {
 	cd "${kernel_path}" || exit 1
 
 	# Apply version specific patches
+	info "Applying patches from ${patches_dir_for_version}"
 	${packaging_scripts_dir}/apply_patches.sh "${patches_dir_for_version}"
 
 	[ -n "${hypervisor_target}" ] || hypervisor_target="kvm"
 	[ -n "${kernel_config_path}" ] || kernel_config_path=$(get_default_kernel_config "${kernel_version}" "${hypervisor_target}" "${arch_target}" "${kernel_path}")
 
-	info "Copying config file from: ${kernel_config_path}"
+	info "Copying config file from: ${kernel_config_path} to $(pwd)"
 	cp "${kernel_config_path}" ./.config
 	make oldconfig
 	)
@@ -475,9 +476,11 @@ main() {
 		if [[ ${experimental_kernel} == "true" ]]; then
 			kernel_version=$(get_from_kata_deps "assets.kernel-experimental.tag" "${kata_version}")
 		else
+			info "Getting Kernel version..."
 			kernel_version=$(get_from_kata_deps "assets.kernel.version" "${kata_version}")
 			#Remove extra 'v'
 			kernel_version="${kernel_version#v}"
+			info "Getting Kernel version: ${kernel_version#v}"
 		fi
 	fi
 
@@ -491,7 +494,7 @@ main() {
 		info "Config version: ${config_version}"
 	fi
 
-	info "Kernel version: ${kernel_version}"
+	info "!Kernel version: ${kernel_version}"
 
 	case "${subcmd}" in
 		build)
