@@ -91,7 +91,7 @@ diff --git a/hw/arm/virt.c b/hw/arm/virt.c
 index ecfee362a1..09eb6c06e4 100644
 --- a/hw/arm/virt.c
 +++ b/hw/arm/virt.c
-@@ -2189,9 +2189,12 @@ static void virt_memory_pre_plug(HotplugHandler *hotplug_dev, DeviceState *dev,
+@@ -2237,9 +2237,12 @@ static void virt_memory_pre_plug(HotplugHandler *hotplug_dev, DeviceState *dev,
      const bool is_nvdimm = object_dynamic_cast(OBJECT(dev), TYPE_NVDIMM);
  
      if (!vms->acpi_dev) {
@@ -107,7 +107,7 @@ index ecfee362a1..09eb6c06e4 100644
      }
  
      if (vms->mte) {
-@@ -2224,8 +2227,10 @@ static void virt_memory_plug(HotplugHandler *hotplug_dev,
+@@ -2268,8 +2268,10 @@ static void virt_memory_plug(HotplugHandler *hotplug_dev,
          nvdimm_plug(ms->nvdimms_state);
      }
  
