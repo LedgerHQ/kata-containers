@@ -109,6 +109,66 @@ func (a *Client) PutMmds(params *PutMmdsParams) (*PutMmdsNoContent, error) {
 }
 
 /*
+PutMmdsConfig sets m m d s configuration pre boot only
+
+Creates MMDS configuration to be used by the MMDS network stack.
+*/
+func (a *Client) PutMmdsConfig(params *PutMmdsConfigParams) (*PutMmdsConfigNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutMmdsConfigParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "PutMmdsConfig",
+		Method:             "PUT",
+		PathPattern:        "/mmds/config",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PutMmdsConfigReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutMmdsConfigNoContent), nil
+
+}
+
+/*
+CreateSnapshot creates a full or diff snapshot post boot only
+
+Creates a snapshot of the microVM state. The microVM should be in the `Paused` state.
+*/
+func (a *Client) CreateSnapshot(params *CreateSnapshotParams) (*CreateSnapshotNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateSnapshotParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createSnapshot",
+		Method:             "PUT",
+		PathPattern:        "/snapshot/create",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &CreateSnapshotReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CreateSnapshotNoContent), nil
+
+}
+
+/*
 CreateSyncAction creates a synchronous action
 */
 func (a *Client) CreateSyncAction(params *CreateSyncActionParams) (*CreateSyncActionNoContent, error) {
@@ -133,6 +193,62 @@ func (a *Client) CreateSyncAction(params *CreateSyncActionParams) (*CreateSyncAc
 		return nil, err
 	}
 	return result.(*CreateSyncActionNoContent), nil
+
+}
+
+/*
+DescribeBalloonConfig returns the current balloon device configuration
+*/
+func (a *Client) DescribeBalloonConfig(params *DescribeBalloonConfigParams) (*DescribeBalloonConfigOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDescribeBalloonConfigParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "describeBalloonConfig",
+		Method:             "GET",
+		PathPattern:        "/balloon",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DescribeBalloonConfigReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DescribeBalloonConfigOK), nil
+
+}
+
+/*
+DescribeBalloonStats returns the latest balloon device statistics only if enabled pre boot
+*/
+func (a *Client) DescribeBalloonStats(params *DescribeBalloonStatsParams) (*DescribeBalloonStatsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDescribeBalloonStatsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "describeBalloonStats",
+		Method:             "GET",
+		PathPattern:        "/balloon/statistics",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DescribeBalloonStatsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*DescribeBalloonStatsOK), nil
 
 }
 
@@ -195,7 +311,97 @@ func (a *Client) GetMachineConfiguration(params *GetMachineConfigurationParams) 
 }
 
 /*
-PatchGuestDriveByID updates the properties of a drive
+LoadSnapshot loads a snapshot pre boot only
+
+Loads the microVM state from a snapshot. Only accepted on a fresh Firecracker process (before configuring any resource other than the Logger and Metrics).
+*/
+func (a *Client) LoadSnapshot(params *LoadSnapshotParams) (*LoadSnapshotNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewLoadSnapshotParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "loadSnapshot",
+		Method:             "PUT",
+		PathPattern:        "/snapshot/load",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &LoadSnapshotReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*LoadSnapshotNoContent), nil
+
+}
+
+/*
+PatchBalloon updates a balloon device
+
+Updates an existing balloon device, before or after machine startup. Will fail if update is not possible.
+*/
+func (a *Client) PatchBalloon(params *PatchBalloonParams) (*PatchBalloonNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPatchBalloonParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "patchBalloon",
+		Method:             "PATCH",
+		PathPattern:        "/balloon",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PatchBalloonReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PatchBalloonNoContent), nil
+
+}
+
+/*
+PatchBalloonStatsInterval updates a balloon device statistics polling interval
+
+Updates an existing balloon device statistics interval, before or after machine startup. Will fail if update is not possible.
+*/
+func (a *Client) PatchBalloonStatsInterval(params *PatchBalloonStatsIntervalParams) (*PatchBalloonStatsIntervalNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPatchBalloonStatsIntervalParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "patchBalloonStatsInterval",
+		Method:             "PATCH",
+		PathPattern:        "/balloon/statistics",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PatchBalloonStatsIntervalReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PatchBalloonStatsIntervalNoContent), nil
+
+}
+
+/*
+PatchGuestDriveByID updates the properties of a drive post boot only
 
 Updates the properties of the drive with the ID specified by drive_id path parameter. Will fail if update is not possible.
 */
@@ -225,7 +431,7 @@ func (a *Client) PatchGuestDriveByID(params *PatchGuestDriveByIDParams) (*PatchG
 }
 
 /*
-PatchGuestNetworkInterfaceByID updates the rate limiters applied to a network interface
+PatchGuestNetworkInterfaceByID updates the rate limiters applied to a network interface post boot only
 
 Updates the rate limiters applied to a network interface.
 */
@@ -255,7 +461,7 @@ func (a *Client) PatchGuestNetworkInterfaceByID(params *PatchGuestNetworkInterfa
 }
 
 /*
-PatchMachineConfiguration partiallies updates the machine configuration of the VM
+PatchMachineConfiguration partiallies updates the machine configuration of the VM pre boot only
 
 Partially updates the Virtual Machine Configuration with the specified input. If any of the parameters has an incorrect value, the whole update fails.
 */
@@ -285,9 +491,69 @@ func (a *Client) PatchMachineConfiguration(params *PatchMachineConfigurationPara
 }
 
 /*
-PutGuestBootSource creates or updates the boot source
+PatchVM updates the micro VM state
 
-Creates new boot source if one does not already exist, otherwise updates it. Will fail if update is not possible. Note that the only currently supported boot source is LocalImage.
+Sets the desired state (Paused or Resumed) for the microVM.
+*/
+func (a *Client) PatchVM(params *PatchVMParams) (*PatchVMNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPatchVMParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "patchVm",
+		Method:             "PATCH",
+		PathPattern:        "/vm",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PatchVMReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PatchVMNoContent), nil
+
+}
+
+/*
+PutBalloon creates or updates a balloon device
+
+Creates a new balloon device if one does not already exist, otherwise updates it, before machine startup. This will fail after machine startup. Will fail if update is not possible.
+*/
+func (a *Client) PutBalloon(params *PutBalloonParams) (*PutBalloonNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutBalloonParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putBalloon",
+		Method:             "PUT",
+		PathPattern:        "/balloon",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PutBalloonReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutBalloonNoContent), nil
+
+}
+
+/*
+PutGuestBootSource creates or updates the boot source pre boot only
+
+Creates new boot source if one does not already exist, otherwise updates it. Will fail if update is not possible.
 */
 func (a *Client) PutGuestBootSource(params *PutGuestBootSourceParams) (*PutGuestBootSourceNoContent, error) {
 	// TODO: Validate the params before sending
@@ -315,7 +581,7 @@ func (a *Client) PutGuestBootSource(params *PutGuestBootSourceParams) (*PutGuest
 }
 
 /*
-PutGuestDriveByID creates or updates a drive
+PutGuestDriveByID creates or updates a drive pre boot only
 
 Creates new drive with ID specified by drive_id path parameter. If a drive with the specified ID already exists, updates its state based on new input. Will fail if update is not possible.
 */
@@ -345,7 +611,7 @@ func (a *Client) PutGuestDriveByID(params *PutGuestDriveByIDParams) (*PutGuestDr
 }
 
 /*
-PutGuestNetworkInterfaceByID creates a network interface
+PutGuestNetworkInterfaceByID creates a network interface pre boot only
 
 Creates new network interface with ID specified by iface_id path parameter.
 */
@@ -375,7 +641,7 @@ func (a *Client) PutGuestNetworkInterfaceByID(params *PutGuestNetworkInterfaceBy
 }
 
 /*
-PutGuestVsock creates updates a vsock device
+PutGuestVsock creates updates a vsock device pre boot only
 
 The first call creates the device with the configuration specified in body. Subsequent calls will update the device configuration. May fail if update is not possible.
 */
@@ -405,7 +671,7 @@ func (a *Client) PutGuestVsock(params *PutGuestVsockParams) (*PutGuestVsockNoCon
 }
 
 /*
-PutLogger initializes the logger by specifying two named pipes i e for the logs and metrics output
+PutLogger initializes the logger by specifying a named pipe or a file for the logs output
 */
 func (a *Client) PutLogger(params *PutLoggerParams) (*PutLoggerNoContent, error) {
 	// TODO: Validate the params before sending
@@ -433,7 +699,7 @@ func (a *Client) PutLogger(params *PutLoggerParams) (*PutLoggerNoContent, error)
 }
 
 /*
-PutMachineConfiguration updates the machine configuration of the VM
+PutMachineConfiguration updates the machine configuration of the VM pre boot only
 
 Updates the Virtual Machine Configuration with the specified input. Firecracker starts with default values for vCPU count (=1) and memory size (=128 MiB). With Hyperthreading enabled, the vCPU count is restricted to be 1 or an even number, otherwise there are no restrictions regarding the vCPU count. If any of the parameters has an incorrect value, the whole update fails.
 */
@@ -459,6 +725,34 @@ func (a *Client) PutMachineConfiguration(params *PutMachineConfigurationParams) 
 		return nil, err
 	}
 	return result.(*PutMachineConfigurationNoContent), nil
+
+}
+
+/*
+PutMetrics initializes the metrics system by specifying a named pipe or a file for the metrics output
+*/
+func (a *Client) PutMetrics(params *PutMetricsParams) (*PutMetricsNoContent, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutMetricsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putMetrics",
+		Method:             "PUT",
+		PathPattern:        "/metrics",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &PutMetricsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PutMetricsNoContent), nil
 
 }
 
