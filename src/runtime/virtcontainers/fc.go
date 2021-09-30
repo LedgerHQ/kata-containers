@@ -888,22 +888,24 @@ func (fc *firecracker) cleanupJail() {
 	span, _ := fc.trace("cleanupJail")
 	defer span.End()
 
-	fc.umountResource(fcKernel)
-	fc.umountResource(fcRootfs)
-	fc.umountResource(fcLogFifo)
-	fc.umountResource(fcMetricsFifo)
-	fc.umountResource(defaultFcConfig)
-	// if running with jailer, we also need to umount fc.jailerRoot
-	if fc.config.JailerPath != "" {
-		if err := syscall.Unmount(fc.jailerRoot, syscall.MNT_DETACH); err != nil {
-			fc.Logger().WithField("JailerRoot", fc.jailerRoot).WithError(err).Error("Failed to umount")
-		}
-	}
+	fc.Logger().Info("dummy cleanupJail")
 
-	fc.Logger().WithField("cleaningJail", fc.vmPath).Info()
-	if err := os.RemoveAll(fc.vmPath); err != nil {
-		fc.Logger().WithField("cleanupJail failed", err).Error()
-	}
+	// fc.umountResource(fcKernel)
+	// fc.umountResource(fcRootfs)
+	// fc.umountResource(fcLogFifo)
+	// fc.umountResource(fcMetricsFifo)
+	// fc.umountResource(defaultFcConfig)
+	// // if running with jailer, we also need to umount fc.jailerRoot
+	// if fc.config.JailerPath != "" {
+	// 	if err := syscall.Unmount(fc.jailerRoot, syscall.MNT_DETACH); err != nil {
+	// 		fc.Logger().WithField("JailerRoot", fc.jailerRoot).WithError(err).Error("Failed to umount")
+	// 	}
+	// }
+
+	// fc.Logger().WithField("cleaningJail", fc.vmPath).Info()
+	// if err := os.RemoveAll(fc.vmPath); err != nil {
+	// 	fc.Logger().WithField("cleanupJail failed", err).Error()
+	// }
 }
 
 // stopSandbox will stop the Sandbox's VM.
